@@ -1,6 +1,7 @@
 package com.cyberscan.app.ui
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -12,9 +13,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.platform.LocalContext
 
+@SuppressLint("InlinedApi")
 fun requiredScanPermissions(apiLevel: Int): Array<String> = buildList {
     add(Manifest.permission.BLUETOOTH_SCAN)
     add(Manifest.permission.BLUETOOTH_CONNECT)
+    add(Manifest.permission.ACCESS_COARSE_LOCATION)
     add(Manifest.permission.ACCESS_FINE_LOCATION)
     if (apiLevel >= 33) add(Manifest.permission.POST_NOTIFICATIONS)
 }.toTypedArray()
