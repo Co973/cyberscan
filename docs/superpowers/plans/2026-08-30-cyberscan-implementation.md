@@ -6,7 +6,7 @@
 
 **Architecture:** A single Android app module is split into focused core, data, domain, service, and UI packages. Pure parsing, correlation, subnet, adapter-selection, and state-reducer logic stays Android-free and receives JVM tests; Android shell, sensor, service, permission, and Compose adapters sit at the edges.
 
-**Tech Stack:** Kotlin 2.4.10, Android Gradle Plugin 9.3.2, Android API 36, Compose BOM 2026.08.00, Material 3, Hilt 2.60.1, KSP 2.3.11, coroutines/StateFlow, JUnit 5, XML pull parsing, Gradle Kotlin DSL
+**Tech Stack:** Kotlin 2.4.10, Android Gradle Plugin 9.3.2, Android API 36, Compose BOM 2025.08.00, Material 3, Hilt 2.60.1, KSP 2.3.11, coroutines/StateFlow, JUnit 5, XML pull parsing, Gradle Kotlin DSL
 
 **Spec:** `docs/superpowers/specs/2026-08-30-cyberscan-design.md`
 
@@ -14,7 +14,7 @@
 
 - Application ID is exactly `com.cyberscan.app`.
 - Compile and target SDK are API 36; minimum SDK is API 31.
-- Pin AGP 9.3.2, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, and Compose BOM 2026.08.00.
+- Pin AGP 9.3.2, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, and the API-36-compatible Compose BOM 2025.08.00.
 - Keep exactly one Android application module.
 - Runtime integrations are hardware-only: no mock repository, sample devices, cloud calls, analytics, or persistence.
 - `bluelog` runs in a dedicated killable root process; one-shot commands use a serialized persistent root shell.
@@ -107,7 +107,7 @@ class ScanModelsTest {
 
 - [ ] **Step 2: Create the Gradle and manifest scaffold**
 
-Configure `compileSdk = 36`, `targetSdk = 36`, `minSdk = 31`, AGP 9.3.2, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, and Compose BOM 2026.08.00. Enable Compose, Hilt/KSP, coroutines, lifecycle, XML pull support, JUnit 5, and `useJUnitPlatform()`. Declare `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `ACCESS_FINE_LOCATION`, `ACCESS_WIFI_STATE`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, and `POST_NOTIFICATIONS`; declare the service with `android:foregroundServiceType="connectedDevice"` and lock the activity to portrait.
+Configure `compileSdk = 36`, `targetSdk = 36`, `minSdk = 31`, AGP 9.3.2, Kotlin 2.4.10, KSP 2.3.11, Hilt 2.60.1, and Compose BOM 2025.08.00. Enable Compose, Hilt/KSP, coroutines, lifecycle, XML pull support, JUnit 5, and `useJUnitPlatform()`. Declare `BLUETOOTH_SCAN`, `BLUETOOTH_CONNECT`, `ACCESS_FINE_LOCATION`, `ACCESS_WIFI_STATE`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_CONNECTED_DEVICE`, and `POST_NOTIFICATIONS`; declare the service with `android:foregroundServiceType="connectedDevice"` and lock the activity to portrait.
 
 - [ ] **Step 3: Implement the model types**
 
