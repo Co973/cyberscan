@@ -9,6 +9,9 @@ import com.cyberscan.app.core.shell.ShellExecutor
 import com.cyberscan.app.data.bluetooth.BluetoothRepository
 import com.cyberscan.app.data.network.NetworkRepository
 import com.cyberscan.app.service.BluetoothAdapterGateway
+import com.cyberscan.app.service.AndroidScanServiceLauncher
+import com.cyberscan.app.service.ScanController
+import com.cyberscan.app.service.ScanServiceLauncher
 import com.cyberscan.app.service.ScanSessionController
 import com.cyberscan.app.service.RootBluetoothAdapterGateway
 import dagger.Module
@@ -62,7 +65,12 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideScanController(
+    fun provideScanServiceLauncher(@ApplicationContext context: Context): ScanServiceLauncher =
+        AndroidScanServiceLauncher(context)
+
+    @Provides
+    @Singleton
+    fun provideScanSessionController(
         executor: CommandExecutor,
         adapterGateway: BluetoothAdapterGateway,
         bluetooth: BluetoothRepository,
@@ -76,5 +84,7 @@ object AppModule {
         emf = emf,
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
     )
-}
 
+    @Provides
+    fun provideScanController(controller: ScanSessionController): ScanController = controller
+}

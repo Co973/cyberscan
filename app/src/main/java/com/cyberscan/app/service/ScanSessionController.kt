@@ -21,11 +21,11 @@ class ScanSessionController(
     private val network: NetworkScanGateway,
     private val emf: EmfReadingSource,
     private val scope: CoroutineScope,
-) {
+) : ScanController {
     private val _state = MutableStateFlow(ScanUiState())
     private var networkDevices: List<NetworkDevice> = emptyList()
 
-    val state: StateFlow<ScanUiState> = _state.asStateFlow()
+    override val state: StateFlow<ScanUiState> = _state.asStateFlow()
 
     init {
         scope.launch {
@@ -45,14 +45,14 @@ class ScanSessionController(
         }
     }
 
-    fun start() {
+    override fun start() {
         if (_state.value.phase == ScanPhase.Calibrating || _state.value.phase == ScanPhase.Scanning) return
         networkDevices = emptyList()
         reduce(ScanEvent.StartRequested)
         launchSession()
     }
 
-    fun retry() {
+    override fun retry() {
         bluetooth.stopScan()
         emf.stop()
         networkDevices = emptyList()
@@ -91,13 +91,13 @@ class ScanSessionController(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         bluetooth.stopScan()
         emf.stop()
         reduce(ScanEvent.StopRequested)
     }
 
-    fun selectTarget(macAddress: String) {
+    override fun selectTarget(macAddress: String) {
         reduce(ScanEvent.TargetSelected(macAddress))
     }
 

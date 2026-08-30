@@ -4,6 +4,7 @@ import com.cyberscan.app.data.bluetooth.HciAdapter
 import com.cyberscan.app.domain.model.BluetoothDevice
 import com.cyberscan.app.domain.model.EmfReading
 import com.cyberscan.app.domain.model.NetworkDevice
+import com.cyberscan.app.domain.model.ScanUiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
@@ -24,6 +25,19 @@ interface NetworkScanGateway {
 
 interface EmfReadingSource {
     val readings: StateFlow<EmfReading?>
+    fun start()
+    fun stop()
+}
+
+interface ScanController {
+    val state: StateFlow<ScanUiState>
+    fun start()
+    fun stop()
+    fun retry()
+    fun selectTarget(macAddress: String)
+}
+
+interface ScanServiceLauncher {
     fun start()
     fun stop()
 }
