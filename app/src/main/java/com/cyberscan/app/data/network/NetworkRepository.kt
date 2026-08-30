@@ -3,11 +3,12 @@ package com.cyberscan.app.data.network
 import com.cyberscan.app.core.shell.CommandExecutor
 import com.cyberscan.app.domain.model.NetworkDevice
 import com.cyberscan.app.domain.usecase.Ipv4Subnet
+import com.cyberscan.app.service.NetworkScanGateway
 
 class NetworkRepository(
     private val commandExecutor: CommandExecutor,
-) {
-    suspend fun scan(interfaceName: String = "wlan0"): Result<List<NetworkDevice>> = runCatching {
+) : NetworkScanGateway {
+    override suspend fun scan(interfaceName: String): Result<List<NetworkDevice>> = runCatching {
         require(INTERFACE_NAME.matches(interfaceName)) { "Invalid network interface name" }
         val addressResult = commandExecutor.run(
             listOf("ip", "-o", "-4", "addr", "show", "dev", interfaceName),

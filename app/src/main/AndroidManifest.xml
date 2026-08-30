@@ -16,6 +16,12 @@
         android:allowBackup="false"
         android:label="CyberScan"
         android:supportsRtl="true"
-        android:theme="@style/Theme.CyberScan" />
+        android:theme="@style/Theme.CyberScan">
+
+        <service
+            android:name=".service.ScanForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+    </application>
 </manifest>
 
