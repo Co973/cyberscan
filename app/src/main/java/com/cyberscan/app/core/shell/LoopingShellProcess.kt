@@ -16,6 +16,10 @@ class LoopProcessDiedUnexpectedlyException(
 
 interface LoopProcessRunner {
     fun start(command: List<String>): Flow<String>
+    fun start(
+        command: List<String>,
+        environment: CommandEnvironment,
+    ): Flow<String> = start(command)
     fun stop()
 }
 
@@ -23,24 +27,24 @@ class LoopingShellProcess(
     private val tag: String,
     private val processRegistry: AppProcessRegistry,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val useChroot: Boolean = true,
-    private val chrootPath: String = "/data/local/nhsystem/kali-armhf",
 ) : LoopProcessRunner {
     @Volatile
     private var stopRequested = false
     private var process: Process? = null
 
-    override fun start(command: List<String>): Flow<String> = callbackFlow {
+    override fun start(command: List<String>): Flow<String> =
+        start(command, CommandEnvironment.AndroidRoot)
+
+    override fun start(
+        command: List<String>,
+        environment: CommandEnvironment,
+    ): Flow<String> = callbackFlow {
         require(command.isNotEmpty()) { "Loop command cannot be empty" }
         require(command.none(String::isBlank)) { "Loop arguments cannot be blank" }
         stopRequested = false
 
         val payload = command.joinToString(" ", transform = ::shellWord)
-        val privilegedPayload = if (useChroot) {
-            "chroot ${shellWord(chrootPath)} /bin/bash -lc ${shellWord(payload)}"
-        } else {
-            payload
-        }
+        val privilegedPayload = environment.render(payload)
         val runningProcess = try {
             ProcessBuilder("su", "-c", privilegedPayload)
                 .redirectErrorStream(true)

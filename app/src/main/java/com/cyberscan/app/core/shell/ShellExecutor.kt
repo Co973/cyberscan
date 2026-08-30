@@ -20,13 +20,15 @@ data class CommandResult(
 interface CommandExecutor {
     suspend fun start(): Boolean
     suspend fun run(command: List<String>): CommandResult
+    suspend fun run(
+        command: List<String>,
+        environment: CommandEnvironment,
+    ): CommandResult = run(command)
     fun shutdown()
 }
 
 class ShellExecutor(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
-    private val useChroot: Boolean = true,
-    private val chrootPath: String = "/data/local/nhsystem/kali-armhf",
 ) : CommandExecutor {
     private val commandLock = Mutex()
     private var process: Process? = null
@@ -44,7 +46,7 @@ class ShellExecutor(
                 writer = BufferedWriter(OutputStreamWriter(rootProcess.outputStream))
                 reader = BufferedReader(InputStreamReader(rootProcess.inputStream))
 
-                val result = runUnlocked(listOf("id"), applyChroot = false)
+                val result = runUnlocked(listOf("id"), CommandEnvironment.AndroidRoot)
                 result.exitCode == 0 && result.stdout.lineSequence().any { "uid=0" in it }
             }.getOrElse {
                 closeProcess()
@@ -54,24 +56,30 @@ class ShellExecutor(
     }
 
     override suspend fun run(command: List<String>): CommandResult = withContext(ioDispatcher) {
+        run(command, CommandEnvironment.AndroidRoot)
+    }
+
+    override suspend fun run(
+        command: List<String>,
+        environment: CommandEnvironment,
+    ): CommandResult = withContext(ioDispatcher) {
         commandLock.withLock {
             check(process?.isAlive == true) { "Root shell is not started" }
-            runUnlocked(command, applyChroot = useChroot)
+            runUnlocked(command, environment)
         }
     }
 
-    private fun runUnlocked(command: List<String>, applyChroot: Boolean): CommandResult {
+    private fun runUnlocked(
+        command: List<String>,
+        environment: CommandEnvironment,
+    ): CommandResult {
         require(command.isNotEmpty()) { "Command cannot be empty" }
         require(command.none(String::isBlank)) { "Command arguments cannot be blank" }
         val output = reader ?: error("Root shell reader is unavailable")
         val input = writer ?: error("Root shell writer is unavailable")
         val marker = "__CYBERSCAN_${UUID.randomUUID()}__"
         val payload = command.joinToString(" ", transform = ::shellWord)
-        val privilegedPayload = if (applyChroot) {
-            "chroot ${shellWord(chrootPath)} /bin/bash -lc ${shellWord(payload)}"
-        } else {
-            payload
-        }
+        val privilegedPayload = environment.render(payload)
 
         input.write("$privilegedPayload; printf '\\n$marker:%s\\n' \"${'$'}?\"\n")
         input.flush()
