@@ -3,7 +3,6 @@ package com.cyberscan.app.data.bluetooth
 import com.cyberscan.app.core.shell.LoopProcessDiedUnexpectedlyException
 import com.cyberscan.app.core.shell.LoopProcessRunner
 import com.cyberscan.app.domain.model.BluetoothDevice
-import com.cyberscan.app.service.BluetoothScanGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,17 +13,17 @@ import kotlinx.coroutines.launch
 class BluetoothRepository(
     private val loopRunner: LoopProcessRunner,
     private val clock: () -> Long = System::currentTimeMillis,
-) : BluetoothScanGateway {
+) {
     private val deviceMap = linkedMapOf<String, BluetoothDevice>()
     private val _devices = MutableStateFlow<List<BluetoothDevice>>(emptyList())
     private val _active = MutableStateFlow(false)
     private val _fatalError = MutableStateFlow<String?>(null)
 
-    override val devices: StateFlow<List<BluetoothDevice>> = _devices.asStateFlow()
+    val devices: StateFlow<List<BluetoothDevice>> = _devices.asStateFlow()
     val active: StateFlow<Boolean> = _active.asStateFlow()
-    override val fatalError: StateFlow<String?> = _fatalError.asStateFlow()
+    val fatalError: StateFlow<String?> = _fatalError.asStateFlow()
 
-    override fun startScan(adapter: HciAdapter, scope: CoroutineScope) {
+    fun startScan(adapter: HciAdapter, scope: CoroutineScope) {
         if (_active.value) return
         require(ADAPTER_NAME.matches(adapter.name)) { "Invalid Bluetooth adapter name" }
         require(adapter.isUp && adapter.isRunning) { "Bluetooth adapter is not active" }
@@ -65,7 +64,7 @@ class BluetoothRepository(
         _devices.value = deviceMap.values.toList()
     }
 
-    override fun stopScan() {
+    fun stopScan() {
         loopRunner.stop()
         _active.value = false
     }

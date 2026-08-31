@@ -1,5 +1,6 @@
 package com.cyberscan.app.data.bluetooth
 
+import com.cyberscan.app.service.BluetoothScanGateway
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,19 +23,19 @@ class CompositeBluetoothScanner(
     private val native: NativeBluetoothScanner,
     private val external: OptionalHciBackend,
     private val accumulator: BluetoothDeviceAccumulator,
-) {
+) : BluetoothScanGateway {
     private val _adapterLabel = MutableStateFlow(ANDROID_ADAPTER_LABEL)
     private val _warning = MutableStateFlow<String?>(null)
     private val sessionJobs = mutableListOf<Job>()
     private var active = false
 
-    val devices = accumulator.devices
-    val fatalError: StateFlow<String?> = native.failure
-    val adapterLabel: StateFlow<String> = _adapterLabel.asStateFlow()
-    val warning: StateFlow<String?> = _warning.asStateFlow()
+    override val devices = accumulator.devices
+    override val fatalError: StateFlow<String?> = native.failure
+    override val adapterLabel: StateFlow<String> = _adapterLabel.asStateFlow()
+    override val warning: StateFlow<String?> = _warning.asStateFlow()
 
     @Synchronized
-    fun startScan(scope: CoroutineScope): Result<Unit> {
+    override fun startScan(scope: CoroutineScope): Result<Unit> {
         if (active) return Result.success(Unit)
         accumulator.clear()
         _adapterLabel.value = ANDROID_ADAPTER_LABEL
@@ -64,7 +65,7 @@ class CompositeBluetoothScanner(
     }
 
     @Synchronized
-    fun stopScan() {
+    override fun stopScan() {
         if (!active) return
         sessionJobs.forEach(Job::cancel)
         sessionJobs.clear()
@@ -77,4 +78,3 @@ class CompositeBluetoothScanner(
         const val ANDROID_ADAPTER_LABEL = "ANDROID HAL"
     }
 }
-

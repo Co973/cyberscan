@@ -72,6 +72,13 @@ fun ScanScreen(
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
+            state.warning?.let { warning ->
+                Text(
+                    text = "~ $warning",
+                    color = SignalCyan,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
             ActionBar(state.phase, onStart, onStop, onRetry, Modifier.fillMaxWidth())
         }
     }

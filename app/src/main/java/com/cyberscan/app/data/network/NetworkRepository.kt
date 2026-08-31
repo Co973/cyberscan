@@ -13,6 +13,7 @@ class NetworkRepository(
 ) : NetworkScanGateway {
     override suspend fun scan(interfaceName: String): Result<List<NetworkDevice>> = runCatching {
         require(INTERFACE_NAME.matches(interfaceName)) { "Invalid network interface name" }
+        check(commandExecutor.start()) { "Root access is unavailable for Nmap" }
         val environment = environmentResolver?.resolve(setOf("ip", "nmap"))
             ?: if (environmentResolver == null) CommandEnvironment.AndroidRoot
             else error("Nmap is not available in a supported command environment")

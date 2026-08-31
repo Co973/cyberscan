@@ -28,6 +28,7 @@ class BluelogHciBackend(
     ): HciAdapter? {
         if (active) return null
         _warning.value = null
+        if (!executor.start()) return null
         val environment = resolver.resolve(setOf("hciconfig", "bluelog")) ?: return null
         val result = executor.run(listOf("hciconfig", "-a"), environment)
         if (result.exitCode != 0) return null
@@ -67,4 +68,3 @@ class BluelogHciBackend(
         active = false
     }
 }
-

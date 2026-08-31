@@ -1,6 +1,5 @@
 package com.cyberscan.app.service
 
-import com.cyberscan.app.core.shell.CommandExecutor
 import com.cyberscan.app.domain.model.NetworkDevice
 import com.cyberscan.app.domain.model.ScanPhase
 import com.cyberscan.app.domain.model.ScanUiState
@@ -15,8 +14,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 class ScanSessionController(
-    private val rootExecutor: CommandExecutor,
-    private val adapterGateway: BluetoothAdapterGateway,
     private val bluetooth: BluetoothScanGateway,
     private val network: NetworkScanGateway,
     private val emf: EmfReadingSource,
@@ -36,6 +33,16 @@ class ScanSessionController(
         scope.launch {
             bluetooth.fatalError.filterNotNull().collect { reason ->
                 fail(reason)
+            }
+        }
+        scope.launch {
+            bluetooth.warning.collect { warning ->
+                reduce(ScanEvent.WarningChanged(warning))
+            }
+        }
+        scope.launch {
+            bluetooth.adapterLabel.collect { adapterName ->
+                reduce(ScanEvent.AdapterChanged(adapterName))
             }
         }
         scope.launch {
@@ -61,22 +68,20 @@ class ScanSessionController(
     }
 
     private fun launchSession() {
+        emf.start()
+        val bluetoothResult = bluetooth.startScan(scope)
+        if (bluetoothResult.isFailure) {
+            emf.stop()
+            reduce(
+                ScanEvent.HardFailure(
+                    bluetoothResult.exceptionOrNull()?.message ?: "Native Bluetooth scan failed",
+                ),
+            )
+            return
+        }
+        reduce(ScanEvent.CalibrationFinished(bluetooth.adapterLabel.value))
+
         scope.launch {
-            if (!rootExecutor.start()) {
-                fail("Root access denied")
-                return@launch
-            }
-
-            val adapter = runCatching { adapterGateway.detect() }.getOrNull()
-            if (adapter == null) {
-                fail("No active Bluetooth adapter detected")
-                return@launch
-            }
-
-            emf.start()
-            bluetooth.startScan(adapter, scope)
-            reduce(ScanEvent.CalibrationFinished(adapter.name))
-
             network.scan("wlan0")
                 .onSuccess { devices ->
                     networkDevices = devices

@@ -108,6 +108,7 @@ data class ScanUiState(
     val networkStatus: NetworkStatus = NetworkStatus.Pending,
     val adapterName: String? = null,
     val emf: EmfReading? = null,
+    val warning: String? = null,
 )
 
 private val MAC_PATTERN = Regex("^[0-9A-F]{2}(?::[0-9A-F]{2}){5}$")

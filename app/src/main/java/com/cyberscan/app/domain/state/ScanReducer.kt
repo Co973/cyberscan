@@ -10,6 +10,8 @@ import com.cyberscan.app.domain.model.normalizeMac
 sealed interface ScanEvent {
     data object StartRequested : ScanEvent
     data class CalibrationFinished(val adapterName: String) : ScanEvent
+    data class AdapterChanged(val adapterName: String) : ScanEvent
+    data class WarningChanged(val warning: String?) : ScanEvent
     data class DevicesChanged(val devices: List<MergedDevice>) : ScanEvent
     data object NetworkAvailable : ScanEvent
     data object NetworkUnavailable : ScanEvent
@@ -37,6 +39,9 @@ object ScanReducer {
         } else {
             state
         }
+
+        is ScanEvent.AdapterChanged -> state.copy(adapterName = event.adapterName)
+        is ScanEvent.WarningChanged -> state.copy(warning = event.warning)
 
         is ScanEvent.DevicesChanged -> {
             val selectedStillExists = event.devices.any {
