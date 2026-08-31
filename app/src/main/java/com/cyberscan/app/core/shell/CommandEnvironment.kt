@@ -11,9 +11,7 @@ sealed interface CommandEnvironment {
         }
     }
 }
-
 internal fun CommandEnvironment.render(payload: String): String = when (this) {
     CommandEnvironment.AndroidRoot -> payload
     is CommandEnvironment.Chroot -> "chroot ${shellWord(root)} /bin/bash -lc ${shellWord(payload)}"
 }
-

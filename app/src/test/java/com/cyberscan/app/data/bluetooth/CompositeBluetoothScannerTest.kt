@@ -150,4 +150,3 @@ class CompositeBluetoothScannerTest {
         const val TEST_MAC = "AA:BB:CC:DD:EE:FF"
     }
 }
-

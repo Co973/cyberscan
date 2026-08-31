@@ -41,4 +41,3 @@ class NativeBluetoothMappingTest {
         assertEquals(DeviceClass.COMPUTER, observation.deviceClass)
     }
 }
-

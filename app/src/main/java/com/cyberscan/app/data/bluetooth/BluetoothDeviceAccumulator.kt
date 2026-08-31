@@ -52,4 +52,3 @@ class BluetoothDeviceAccumulator {
         _devices.value = emptyList()
     }
 }
-

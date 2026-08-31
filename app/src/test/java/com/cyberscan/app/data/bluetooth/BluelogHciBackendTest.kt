@@ -90,4 +90,3 @@ class BluelogHciBackendTest {
         override fun stop() = Unit
     }
 }
-

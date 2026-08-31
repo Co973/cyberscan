@@ -16,4 +16,3 @@ data class BluetoothObservation(
     val rssi: Int?,
     val observedAtMs: Long,
 )
-

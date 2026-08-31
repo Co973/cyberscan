@@ -129,11 +129,9 @@ class AndroidNativeBluetoothPlatform(
         }
     }
 }
-
 private fun Intent.bluetoothDeviceExtra(): BluetoothDevice? = if (Build.VERSION.SDK_INT >= 33) {
     getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
 } else {
     @Suppress("DEPRECATION")
     getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
 }
-

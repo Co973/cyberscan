@@ -6,7 +6,6 @@ fun interface CommandCapabilityProbe {
         commands: Set<String>,
     ): Boolean
 }
-
 class CommandEnvironmentResolver(
     private val probe: CommandCapabilityProbe,
 ) {
@@ -51,4 +50,3 @@ class ShellCommandCapabilityProbe(
         result.exitCode == 0 && result.stdout.isNotBlank()
     }
 }
-

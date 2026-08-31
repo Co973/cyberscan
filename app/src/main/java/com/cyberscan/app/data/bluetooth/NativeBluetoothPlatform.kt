@@ -18,7 +18,6 @@ sealed interface NativeBluetoothEvent {
 
     data class Failure(val reason: String) : NativeBluetoothEvent
 }
-
 interface NativeBluetoothPlatform {
     val available: Boolean
     val enabled: Boolean
@@ -52,4 +51,3 @@ object NativeBluetoothMapper {
         else -> DeviceClass.UNKNOWN
     }
 }
-
